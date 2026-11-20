@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de Sistemas No Lineales | Métodos Numéricos</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+:root{--ink:#13233A;--paper:#F6F4EF;--paper2:#E8EDF2;--card:#FBFAF7;--line:#D3DAE2;--muted:#4A5568;--blue:#1F5E9E;--orange:#A3480A;--orangeL:#F7E3CF;--ok:#1E7B4F;--okL:#E2F2E9;--bad:#B42318;--badL:#FBE4E1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,Arial,sans-serif;font-size:16px;line-height:1.5}
+header{background:var(--ink);color:var(--paper);padding:22px 20px 0}
+.wrap{max-width:980px;margin:0 auto}
+.eyebrow{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#F2A65A;font-weight:600;margin:0}
+h1{font-family:'Space Grotesk',Arial,sans-serif;font-size:28px;margin:6px 0 4px;line-height:1.15}
+header p.sub{margin:0 0 16px;color:#C9D6E3;font-size:15px}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:transparent;border:0;color:#C9D6E3;font:600 15px Inter,Arial,sans-serif;padding:10px 16px;border-radius:10px 10px 0 0;cursor:pointer}
+nav button[aria-selected="true"]{background:var(--paper);color:var(--ink)}
+main{padding:22px 20px 48px}
+h2{font-family:'Space Grotesk',Arial,sans-serif;font-size:22px;margin:0 0 6px}
+h3{font-size:17px;margin:0 0 6px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+.card.blue{border:2px solid var(--blue)}
+.card.orange{border:2px solid #C2661A}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;color:#fff;background:var(--ink);margin-bottom:8px}
+.tag.o1{background:var(--blue)}.tag.o2{background:var(--orange)}.tag.o3{background:#3A4A60}
+.q p.stem{font-weight:600;margin:0 0 10px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;cursor:pointer}
+.opt input{margin-top:4px}
+.opt.correct{border-color:var(--ok);background:var(--okL)}
+.opt.wrong{border-color:var(--bad);background:var(--badL)}
+.fb{margin-top:10px;font-size:15px;border-radius:10px;padding:10px 12px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--okL)}.fb.no{background:var(--orangeL)}
+.btn{background:var(--ink);color:#fff;border:0;border-radius:10px;padding:11px 18px;font:600 15px Inter,Arial,sans-serif;cursor:pointer}
+.btn.sec{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+label.f{display:flex;flex-direction:column;font-size:13px;font-weight:600;color:var(--muted);gap:4px}
+input[type=number],select{font:15px Inter,Arial,sans-serif;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);min-width:110px}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th{background:var(--ink);color:#fff;text-align:left;padding:7px 10px;font-weight:600}
+td{padding:6px 10px;border-bottom:1px solid var(--line)}
+tr:nth-child(even) td{background:#F0F3F6}
+.tblwrap{overflow-x:auto;max-height:420px;overflow-y:auto;border-radius:10px;border:1px solid var(--line)}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.res .card{margin:0}
+.score{font-family:'Space Grotesk',Arial,sans-serif;font-size:32px;font-weight:700}
+.st-ok{color:var(--ok)}.st-mid{color:var(--orange)}.st-bad{color:var(--bad)}
+.note{background:var(--orangeL);border-radius:10px;padding:10px 14px;font-size:15px}
+.mono{font-family:'Courier New',monospace}
+canvas{width:100%;height:260px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.legend{display:flex;gap:16px;font-size:13px;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:14px;height:4px;border-radius:2px;vertical-align:middle;margin-right:6px}
+.hidden{display:none}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:720px){.grid2{grid-template-columns:1fr}h1{font-size:23px}}
+.pill{display:inline-block;background:var(--paper2);border-radius:20px;padding:3px 12px;font-size:13px;font-weight:600;margin:2px 4px 2px 0}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<p class="eyebrow">Métodos Numéricos · Código 23041 · Unidad 2</p>
+<h1>Laboratorio de sistemas no lineales</h1>
+<p class="sub">Punto fijo · Secante · Newton · Newton modificado</p>
+<nav role="tablist">
+<button role="tab" aria-selected="true" data-tab="eval" id="t-eval">Autoevaluación</button>
+<button role="tab" aria-selected="false" data-tab="sim1" id="t-sim1">Simulador 1D</button>
+<button role="tab" aria-selected="false" data-tab="sim2" id="t-sim2">Simulador 2D</button>
+</nav>
+</div></header>
+
+<main class="wrap">
+<!-- ===================== AUTOEVALUACIÓN ===================== -->
+<section id="eval" role="tabpanel">
+<h2>¿Logré los tres objetivos de la clase?</h2>
+<p class="muted">9 preguntas, 3 por objetivo. Elegí una opción y presioná <b>Comprobar</b>: verás la explicación al instante. Al final obtendrás tu resultado por objetivo y qué repasar.</p>
+<div id="quiz"></div>
+<div class="row" style="margin-top:8px"><button class="btn" id="finish">Ver mi resultado por objetivo</button><button class="btn sec" id="reset">Reiniciar</button></div>
+<div id="results" class="hidden" style="margin-top:18px">
+<h2>Tu resultado</h2>
+<div class="res" id="resgrid"></div>
+<p class="note" style="margin-top:14px" id="resnote"></p>
+</div>
+</section>
+
+<!-- ===================== SIMULADOR 1D ===================== -->
+<section id="sim1" role="tabpanel" class="hidden">
+<h2>Simulador 1D: punto fijo, secante y Newton-Raphson</h2>
+<p class="muted">Probá distintos problemas, métodos y valores iniciales. Observá la columna <b>razón</b>: en el punto fijo tiende a |g′(r)|.</p>
+<div class="card">
+<div class="row">
+<label class="f">Problema<select id="p1">
+<option value="exp">f(x) = e⁻ˣ − x</option>
+<option value="cole">Colebrook (x = 1/√f)</option>
+</select></label>
+<label class="f">Método<select id="m1">
+<option value="pf">Punto fijo</option>
+<option value="sec">Secante</option>
+<option value="nr">Newton-Raphson</option>
+</select></label>
+<label class="f" id="gwrap">Función g<select id="g1"></select></label>
+<label class="f">x₀<input type="number" id="x0" step="any" value="0.5"></label>
+<label class="f" id="x1wrap">x₁ (secante)<input type="number" id="x1" step="any" value="1"></label>
+</div>
+<div class="row" style="margin-top:10px" id="colewrap">
+<label class="f">Re<input type="number" id="re" step="any" value="100000"></label>
+<label class="f">ε/D<input type="number" id="ed" step="any" value="0.001"></label>
+</div>
+<div class="row" style="margin-top:10px">
+<label class="f">Tolerancia<input type="number" id="tol1" step="any" value="1e-10"></label>
+<label class="f">Máx. iteraciones<input type="number" id="max1" step="1" value="60"></label>
+<button class="btn" id="run1">Iterar</button>
+</div>
+</div>
+<p class="note" id="msg1"></p>
+<div class="tblwrap"><table><thead><tr><th>k</th><th>xₖ</th><th>|xₖ − xₖ₋₁|</th><th>razón |Δₖ|/|Δₖ₋₁|</th><th>f(xₖ)</th></tr></thead><tbody id="tb1"></tbody></table></div>
+</section>
+
+<!-- ===================== SIMULADOR 2D ===================== -->
+<section id="sim2" role="tabpanel" class="hidden">
+<h2>Simulador 2D: Newton vs. Newton modificado</h2>
+<p class="muted">Sistema de la clase: <span class="mono">f₁ = x² + xy − 10 = 0</span>, <span class="mono">f₂ = y + 3xy² − 57 = 0</span> (raíz (2; 3)). Cambiá el punto inicial y compará.</p>
+<div class="card">
+<div class="row">
+<label class="f">x₀<input type="number" id="sx" step="any" value="1.5"></label>
+<label class="f">y₀<input type="number" id="sy" step="any" value="3.5"></label>
+<label class="f">Máx. iteraciones<input type="number" id="max2" step="1" value="20"></label>
+<button class="btn" id="run2">Comparar</button>
+</div>
+</div>
+<p class="note" id="msg2"></p>
+<canvas id="cv" width="900" height="260" aria-label="Error en escala logarítmica por iteración para Newton y Newton modificado"></canvas>
+<div class="legend"><span><span class="sw" style="background:#A3480A"></span>Newton (orden 2)</span><span><span class="sw" style="background:#1F5E9E"></span>Newton modificado (lineal)</span></div>
+<div class="grid2" style="margin-top:14px">
+<div><h3>Newton: J(xₖ) Δ = −F(xₖ)</h3><div class="tblwrap"><table><thead><tr><th>k</th><th>x</th><th>y</th><th>error</th></tr></thead><tbody id="tbn"></tbody></table></div></div>
+<div><h3>Newton modificado (Gauss-Seidel)</h3><div class="tblwrap"><table><thead><tr><th>k</th><th>x</th><th>y</th><th>error</th></tr></thead><tbody id="tbm"></tbody></table></div></div>
+</div>
+</section>
+</main>
+
+<script>
+// ---------- tabs ----------
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
+  ['eval','sim1','sim2'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==b.dataset.tab));
+  if(b.dataset.tab==='sim2') run2();
+}));
+
+// ---------- quiz ----------
+const OBJ={1:'Explicar',2:'Aplicar',3:'Seleccionar'};
+const REPASO={1:'Repasá la diapositiva 5 (telaraña y criterio): el error se multiplica por |g′(r)| en cada paso; si |g′(r)| > 1, diverge. Usá el Simulador 1D con g₁ y g₂.',
+ 2:'Repasá las diapositivas 6, 7 y 8: fórmula de la secante, el sistema J Δ = −F y el barrido del Newton modificado (usa el valor ya actualizado). Rehacé la iteración 1 en papel y comprobala en el Simulador 2D.',
+ 3:'Repasá las diapositivas 9 y 10 (evaluación y tabla del cierre): qué necesita cada método, cuánto cuesta por paso y qué tan rápido converge.'};
+const Q=[
+ {o:1,s:'Para f(x) = e⁻ˣ − x, ¿por qué la iteración con g₂(x) = −ln x diverge aunque la raíz es la misma?',
+  a:['Porque |g₂′(r)| ≈ 1,76 > 1: cada paso amplifica el error','Porque ln x no está definido en la raíz r ≈ 0,567','Porque x₀ = 0,5 está demasiado lejos de la raíz','Porque g₂ no tiene punto fijo'],c:0,
+  e:'g₂′(x) = −1/x, así que |g₂′(r)| = 1/0,567 ≈ 1,76 > 1. El teorema del punto fijo exige |g′| < 1 cerca de la raíz. ln x sí está definido en r, y la raíz es punto fijo de ambas g.'},
+ {o:1,s:'Una iteración de punto fijo tiene |g′(r)| = 0,5. Cerca de la raíz, en cada paso el error aproximadamente…',
+  a:['se reduce a la mitad','se eleva al cuadrado','se mantiene constante','se duplica'],c:0,
+  e:'eₖ₊₁ ≈ |g′(r)|·eₖ = 0,5·eₖ: convergencia lineal con razón 0,5. Elevarse al cuadrado sería convergencia cuadrática (Newton).'},
+ {o:1,s:'Visto como punto fijo con g(x) = x − f(x)/f′(x), ¿por qué Newton-Raphson converge tan rápido en una raíz simple?',
+  a:['Porque g′(r) = 0','Porque |g′(r)| = 1','Porque usa dos puntos anteriores','Porque el jacobiano es diagonalmente dominante'],c:0,
+  e:'g′(x) = f(x)f″(x)/f′(x)², que vale 0 en la raíz si f′(r) ≠ 0. Con pendiente cero, el término lineal del error desaparece y queda el cuadrático.'},
+ {o:2,s:'Secante para f(x) = e⁻ˣ − x con x₀ = 0 y x₁ = 1. ¿Cuánto vale x₂?',
+  a:['0,6127','0,5000','0,5671','0,6321'],c:0,
+  e:'f(0) = 1, f(1) = e⁻¹ − 1 = −0,6321. x₂ = 1 − (−0,6321)·(1 − 0)/(−0,6321 − 1) = 1 − 0,3873 = 0,6127. (0,5 es lo que da Newton desde x₀ = 0; 0,5671 es la raíz.)'},
+ {o:2,s:'En el método de Newton para sistemas, ¿qué se hace en cada iteración?',
+  a:['Resolver J(xₖ) Δ = −F(xₖ) y luego xₖ₊₁ = xₖ + Δ','Calcular J⁻¹ explícitamente y multiplicar Δ = J⁻¹ F','Iterar xₖ₊₁ = F(xₖ)','Dividir cada fᵢ por ∂fᵢ/∂xᵢ'],c:0,
+  e:'Se resuelve un sistema lineal (LU o Gauss, Unidad 1): es más barato y estable que invertir J. Dividir fᵢ por ∂fᵢ/∂xᵢ es el Newton modificado.'},
+ {o:2,s:'Sistema de la clase desde (1,5; 3,5). El Newton modificado da x₁ = 1,8846. ¿Cuánto vale y₁?',
+  a:['3,1116','3,4500','2,8440','3,0000'],c:0,
+  e:'Se usa el x₁ ya actualizado: f₂ = 3,5 + 3·1,8846·3,5² − 57 = 15,760 y ∂f₂/∂y = 1 + 6·1,8846·3,5 = 40,577, de modo que y₁ = 3,5 − 15,760/40,577 = 3,1116. 3,45 sale de usar x₀ (versión tipo Jacobi) y 2,844 es el y₁ de Newton completo.'},
+ {o:3,s:'f(x) es el resultado de una simulación (caja negra): podés evaluarla, pero no hay fórmula para f′. ¿Qué método conviene?',
+  a:['Secante','Newton-Raphson','Newton para sistemas','Ninguno: hace falta la derivada'],c:0,
+  e:'La secante aproxima f′ con los dos últimos puntos, usa una sola evaluación de f por paso y converge con orden ≈ 1,618.'},
+ {o:3,s:'Sistema de 1000 ecuaciones; armar y factorizar J completo es muy caro, pero J es diagonalmente dominante. ¿Qué conviene probar?',
+  a:['Newton modificado (solo ∂fᵢ/∂xᵢ, sin sistema lineal)','Newton completo en cada paso','Punto fijo con cualquier g','Secante unidimensional'],c:0,
+  e:'El Newton modificado usa n derivadas y ningún sistema lineal. Con dominancia diagonal converge (como Gauss-Seidel), aunque linealmente.'},
+ {o:3,s:'Sistema pequeño (n = 3), jacobiano fácil de calcular, buen x₀ y se necesita máxima precisión en pocas iteraciones. ¿Qué método elegís?',
+  a:['Newton','Newton modificado','Punto fijo','Bisección'],c:0,
+  e:'Con n pequeño el costo de J y de la LU es bajo, y la convergencia cuadrática duplica los dígitos correctos en cada paso.'}
+];
+// shuffle options deterministically per question (seeded) so the correct one is not always first
+function seeded(i){let s=i*9301+49297;return()=>{s=(s*9301+49297)%233280;return s/233280}}
+Q.forEach((q,i)=>{const r=seeded(i+3);const idx=q.a.map((_,j)=>j);for(let j=idx.length-1;j>0;j--){const k=Math.floor(r()*(j+1));[idx[j],idx[k]]=[idx[k],idx[j]]}q.order=idx});
+const ans={};
+function renderQuiz(){
+  const box=document.getElementById('quiz');box.innerHTML='';
+  Q.forEach((q,i)=>{
+    const d=document.createElement('div');d.className='card q';
+    d.innerHTML=`<span class="tag o${q.o}">Objetivo ${q.o} · ${OBJ[q.o]}</span><p class="stem">${i+1}. ${q.s}</p><div class="opts">${q.order.map(j=>`<label class="opt" data-j="${j}"><input type="radio" name="q${i}" value="${j}"><span>${q.a[j]}</span></label>`).join('')}</div><div class="row" style="margin-top:10px"><button class="btn sec chk">Comprobar</button></div><div class="fb"></div>`;
+    d.querySelector('.chk').addEventListener('click',()=>{
+      const sel=d.querySelector('input:checked');const fb=d.querySelector('.fb');
+      if(!sel){fb.className='fb show no';fb.textContent='Elegí una opción primero.';return}
+      const j=+sel.value;ans[i]=(j===q.c);
+      d.querySelectorAll('.opt').forEach(o=>{o.classList.remove('correct','wrong');const jj=+o.dataset.j;if(jj===q.c)o.classList.add('correct');else if(jj===j)o.classList.add('wrong')});
+      d.querySelectorAll('input').forEach(x=>x.disabled=true);d.querySelector('.chk').disabled=true;
+      fb.className='fb show '+(ans[i]?'ok':'no');fb.innerHTML=(ans[i]?'<b>Correcto.</b> ':'<b>No exactamente.</b> ')+q.e;
+    });
+    box.appendChild(d);
+  });
+}
+renderQuiz();
+document.getElementById('finish').addEventListener('click',()=>{
+  const g=document.getElementById('resgrid');g.innerHTML='';let tot=0,answered=0,weak=[];
+  [1,2,3].forEach(o=>{
+    const qs=Q.map((q,i)=>[q,i]).filter(([q])=>q.o===o);
+    const ok=qs.filter(([q,i])=>ans[i]===true).length;const done=qs.filter(([q,i])=>i in ans).length;
+    tot+=ok;answered+=done;
+    let st,cls;if(ok===3){st='Logrado';cls='st-ok'}else if(ok===2){st='En proceso';cls='st-mid'}else{st='A repasar';cls='st-bad'}
+    if(ok<3)weak.push(o);
+    g.insertAdjacentHTML('beforeend',`<div class="card ${o===1?'blue':o===2?'orange':''}"><span class="tag o${o}">Objetivo ${o}</span><h3>${OBJ[o]}</h3><div class="score ${cls}">${ok}/3</div><p style="margin:4px 0 8px"><b class="${cls}">${st}</b>${done<3?` · <span class="muted">${3-done} sin responder</span>`:''}</p>${ok<3?`<p class="muted" style="font-size:14px;margin:0">${REPASO[o]}</p>`:'<p class="muted" style="font-size:14px;margin:0">¡Bien! Podés pasar al reto de implementación.</p>'}</div>`);
+  });
+  document.getElementById('resnote').innerHTML=`Total: <b>${tot}/9</b>${answered<9?` (${9-answered} preguntas sin comprobar)`:''}. `+(weak.length?`Antes de la próxima clase, repasá ${weak.map(o=>'el objetivo '+o).join(' y ')} y volvé a intentarlo.`:'Lograste los tres objetivos. Próxima clase: Unidad 3, optimización (Newton y quasi-Newton).');
+  document.getElementById('results').classList.remove('hidden');
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+});
+document.getElementById('reset').addEventListener('click',()=>{for(const k in ans)delete ans[k];renderQuiz();document.getElementById('results').classList.add('hidden');window.scrollTo(0,0)});
+
+// ---------- simulador 1D ----------
+const fmt=(v,d=10)=>!isFinite(v)?'—':(Math.abs(v)!==0&&(Math.abs(v)<1e-4||Math.abs(v)>=1e6)?v.toExponential(3).replace('.',','):v.toFixed(d).replace('.',','));
+function problem(){
+  const p=document.getElementById('p1').value;
+  if(p==='exp') return {f:x=>Math.exp(-x)-x, df:x=>-Math.exp(-x)-1,
+    gs:{g1:{n:'g₁(x) = e⁻ˣ',g:x=>Math.exp(-x)},g2:{n:'g₂(x) = −ln x',g:x=>x>0?-Math.log(x):NaN}}, x0:0.5,x1:1};
+  const Re=+document.getElementById('re').value, ed=+document.getElementById('ed').value;
+  const A=ed/3.7, Bc=2.51/Re, L=Math.LN10;
+  return {f:x=>x+2*Math.log10(A+Bc*x), df:x=>1+2/L*Bc/(A+Bc*x),
+    gs:{gc:{n:'g(x) = −2 log₁₀(ε/D/3,7 + 2,51 x/Re)',g:x=>(A+Bc*x)>0?-2*Math.log10(A+Bc*x):NaN}}, x0:5,x1:6, cole:true};
+}
+function fillG(){
+  const P=problem();const s=document.getElementById('g1');s.innerHTML=Object.entries(P.gs).map(([k,v])=>`<option value="${k}">${v.n}</option>`).join('');
+  document.getElementById('colewrap').classList.toggle('hidden',!P.cole);
+  document.getElementById('x0').value=P.x0;document.getElementById('x1').value=P.x1;
+  syncM();
+}
+function syncM(){const m=document.getElementById('m1').value;document.getElementById('gwrap').classList.toggle('hidden',m!=='pf');document.getElementById('x1wrap').classList.toggle('hidden',m!=='sec')}
+document.getElementById('p1').addEventListener('change',()=>{fillG();run1()});
+document.getElementById('m1').addEventListener('change',()=>{syncM();run1()});
+document.getElementById('g1').addEventListener('change',run1);
+function run1(){
+  const P=problem();const m=document.getElementById('m1').value;
+  let x0=+document.getElementById('x0').value, x1=+document.getElementById('x1').value;
+  const tol=+document.getElementById('tol1').value||1e-12, mx=Math.min(200,+document.getElementById('max1').value||60);
+  const rows=[];let prevD=NaN,msg='';let xs=[x0];
+  if(m==='sec'){xs=[x0,x1]}
+  rows.push([0,x0,NaN,NaN,P.f(x0)]);if(m==='sec')rows.push([1,x1,Math.abs(x1-x0),NaN,P.f(x1)]);
+  prevD=m==='sec'?Math.abs(x1-x0):NaN;
+  let conv=false;
+  for(let k=xs.length;k<=mx;k++){
+    let xn;const xk=xs[xs.length-1];
+    if(m==='pf') xn=P.gs[document.getElementById('g1').value].g(xk);
+    else if(m==='nr'){const d=P.df(xk);xn=d===0?NaN:xk-P.f(xk)/d}
+    else {const xp=xs[xs.length-2];const den=P.f(xk)-P.f(xp);xn=den===0?NaN:xk-P.f(xk)*(xk-xp)/den}
+    if(!isFinite(xn)){msg='La iteración se detuvo: el siguiente valor no está definido (por ejemplo, ln de un negativo o división por cero).';break}
+    const D=Math.abs(xn-xk);rows.push([k,xn,D,isFinite(prevD)&&prevD>0?D/prevD:NaN,P.f(xn)]);prevD=D;xs.push(xn);
+    if(Math.abs(xn)>1e8){msg='Diverge: los valores crecen sin control.';break}
+    if(D<tol*(1+Math.abs(xn))){conv=true;break}
+  }
+  const last=xs[xs.length-1];
+  if(conv){msg=`Convergió en ${rows[rows.length-1][0]} iteraciones a x ≈ ${fmt(last,10)}`+(P.cole?` → f = 1/x² ≈ ${fmt(1/(last*last),5)}.`:'.');
+    if(m==='pf'){const r=rows.filter(r=>isFinite(r[3])).slice(-3);if(r.length)msg+=` La razón se estabiliza cerca de ${fmt(r[0][3],3)} ≈ |g′(r)|.`}}
+  else if(!msg) msg='No convergió en el máximo de iteraciones. Mirá la columna razón: si es ≥ 1, el método no contrae el error.';
+  document.getElementById('msg1').textContent=msg;
+  document.getElementById('tb1').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${fmt(r[1])}</td><td>${fmt(r[2],3)}</td><td>${fmt(r[3],4)}</td><td>${fmt(r[4],3)}</td></tr>`).join('');
+}
+document.getElementById('run1').addEventListener('click',run1);
+fillG();run1();
+
+// ---------- simulador 2D ----------
+const F2=(x,y)=>[x*x+x*y-10, y+3*x*y*y-57];
+const J2=(x,y)=>[[2*x+y,x],[3*y*y,1+6*x*y]];
+const err=(x,y)=>Math.max(Math.abs(x-2),Math.abs(y-3));
+function run2(){
+  let x=+document.getElementById('sx').value,y=+document.getElementById('sy').value;const mx=Math.min(100,+document.getElementById('max2').value||20);
+  const N=[[0,x,y,err(x,y)]],M=[[0,x,y,err(x,y)]];
+  let a=x,b=y;
+  for(let k=1;k<=mx;k++){const [f1,f2]=F2(a,b),J=J2(a,b);const det=J[0][0]*J[1][1]-J[0][1]*J[1][0];if(!det||!isFinite(det))break;
+    const dx=(-f1*J[1][1]+f2*J[0][1])/det, dy=(-f2*J[0][0]+f1*J[1][0])/det;a+=dx;b+=dy;N.push([k,a,b,err(a,b)]);if(!isFinite(a)||Math.abs(a)>1e8||err(a,b)<1e-15)break}
+  a=x;b=y;
+  for(let k=1;k<=mx;k++){const d1=2*a+b;if(!d1)break;a=a-(a*a+a*b-10)/d1;const d2=1+6*a*b;if(!d2)break;b=b-(b+3*a*b*b-57)/d2;M.push([k,a,b,err(a,b)]);if(!isFinite(a)||Math.abs(a)>1e8||Math.abs(b)>1e8||err(a,b)<1e-15)break}
+  const row=r=>`<tr><td>${r[0]}</td><td>${fmt(r[1],8)}</td><td>${fmt(r[2],8)}</td><td>${fmt(r[3],2)}</td></tr>`;
+  document.getElementById('tbn').innerHTML=N.map(row).join('');document.getElementById('tbm').innerHTML=M.map(row).join('');
+  const it=(A)=>{const r=A.find(r=>r[3]<1e-6);return r?r[0]:null};
+  const Jr=J2(x,y);const dd=Math.abs(Jr[0][0])>Math.abs(Jr[0][1])&&Math.abs(Jr[1][1])>Math.abs(Jr[1][0]);
+  const n=it(N),m=it(M);
+  document.getElementById('msg2').innerHTML=`Iteraciones hasta error < 10⁻⁶: Newton <b>${n??'no alcanzó'}</b> · Newton modificado <b>${m??'no alcanzó'}</b>. En (x₀; y₀), J ${dd?'<b>es</b>':'<b>no es</b>'} diagonalmente dominante. Cerca de la raíz, J(2; 3) = [[7, 2]; [27, 37]] sí lo es: razón teórica del modificado 0,2085.`;
+  draw(N,M);
+}
+function draw(N,M){
+  const c=document.getElementById('cv'),ctx=c.getContext('2d');const W=c.width,H=c.height;ctx.clearRect(0,0,W,H);
+  const pl=58,pr=14,pt=14,pb=34;const all=[...N,...M].filter(r=>isFinite(r[3])&&r[3]>0);
+  const kmax=Math.max(4,...[...N,...M].map(r=>r[0]));const lmin=-16,lmax=Math.max(1,Math.ceil(Math.log10(Math.max(...all.map(r=>r[3]),1))));
+  const X=k=>pl+(W-pl-pr)*k/kmax, Y=v=>{const l=Math.max(lmin,Math.log10(Math.max(v,1e-16)));return pt+(H-pt-pb)*(lmax-l)/(lmax-lmin)};
+  ctx.font='12px Inter, Arial';ctx.fillStyle='#4A5568';ctx.strokeStyle='#E3E8EE';ctx.lineWidth=1;
+  for(let l=lmin;l<=lmax;l+=2){const y=Y(10**l);ctx.beginPath();ctx.moveTo(pl,y);ctx.lineTo(W-pr,y);ctx.stroke();ctx.fillText('1e'+l,8,y+4)}
+  const step=Math.max(1,Math.ceil(kmax/10));for(let k=0;k<=kmax;k+=step){ctx.fillText(k,X(k)-4,H-12)}
+  ctx.fillText('iteración k',W/2-30,H-0.5);
+  const line=(A,col)=>{ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2.5;ctx.beginPath();A.forEach((r,i)=>{if(!isFinite(r[3]))return;const px=X(r[0]),py=Y(r[3]);i?ctx.lineTo(px,py):ctx.moveTo(px,py)});ctx.stroke();A.forEach(r=>{if(!isFinite(r[3]))return;ctx.beginPath();ctx.arc(X(r[0]),Y(r[3]),3.5,0,7);ctx.fill()})};
+  line(M,'#1F5E9E');line(N,'#A3480A');
+}
+document.getElementById('run2').addEventListener('click',run2);
+</script>
+</body>
+</html>
